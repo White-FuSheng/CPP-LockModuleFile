@@ -1,38 +1,49 @@
 #include <iostream>
-#include <fstream>
+#include <windows.h>
 #include <string>
 
 void lockFileOnWindows(const std::string& filePath) {
-    std::string  infinite;
-    // ÒÔ¶ÁĞ´Ä£Ê½´ò¿ªÎÄ¼ş¡£ÔÚWindowsÉÏ£¬Õâ»á×Ô¶¯´´½¨Ò»¸ö¶ÀÕ¼Ëø¡£
-    std::fstream file(filePath, std::ios::in | std::ios::out);
+    std::string infinite;
+    // ä½¿ç”¨ CreateFile ä»¥ç‹¬å æ¨¡å¼æ‰“å¼€æ–‡ä»¶
+    HANDLE hFile = CreateFileA(
+        filePath.c_str(),           // æ–‡ä»¶å
+        GENERIC_READ | GENERIC_WRITE, // è¯»å†™æƒé™
+        0,                          // ä¸å…±äº«ï¼ˆç‹¬å æ¨¡å¼ï¼‰
+        NULL,                       // é»˜è®¤å®‰å…¨å±æ€§
+        OPEN_EXISTING,              // æ‰“å¼€ç°æœ‰æ–‡ä»¶
+        FILE_ATTRIBUTE_NORMAL,      // æ™®é€šæ–‡ä»¶å±æ€§
+        NULL                        // æ— æ¨¡æ¿æ–‡ä»¶
+    );
 
-    if (!file.is_open()) {
+    if (hFile == INVALID_HANDLE_VALUE) {
         std::cerr << "Error: Could not open file " << filePath << std::endl;
+        std::cerr << "Error code: " << GetLastError() << std::endl;
         return;
     }
+
     system("cls");
-    std::cout << "Successfully opened and locked Module Flie: " << filePath << std::endl;
+    std::cout << "Successfully opened and locked Module File: " << filePath << std::endl;
     std::cout << "The Module File is now in use and cannot be accessed by other programs." << std::endl;
     std::cout << "Module isolation successful. Press Enter to close and release..." << std::endl;
 
-    // ³ÌĞòÔİÍ££¬±£³ÖÎÄ¼ş´ò¿ª×´Ì¬£¬´Ó¶øËø¶¨ÎÄ¼ş
+    // ç¨‹åºæš‚åœï¼Œä¿æŒæ–‡ä»¶æ‰“å¼€çŠ¶æ€ï¼Œä»è€Œé”å®šæ–‡ä»¶
     std::cin.get();
-    for (int i = 0; i == i; i = i)
-    {
+    while (true) {
         std::cin >> infinite;
         system("cls");
-        std::cout << "Successfully opened and locked Module Flie: " << filePath << std::endl;
+        std::cout << "Successfully opened and locked Module File: " << filePath << std::endl;
         std::cout << "The Module File is now in use and cannot be accessed by other programs." << std::endl;
         std::cout << "Module isolation successful. Press Enter to close and release..." << std::endl;
     }
+
+    // å…³é—­æ–‡ä»¶å¥æŸ„ï¼ˆé‡Šæ”¾é”ï¼‰
+    CloseHandle(hFile);
 }
 
 int main() {
-    std::string filePath; 
+    std::string filePath;
     std::cin >> filePath;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Çå¿Õ»º³åÇø
+    //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // æ¸…ç©ºç¼“å†²åŒº
     lockFileOnWindows(filePath);
     return 0;
 }
-
